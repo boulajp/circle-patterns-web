@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Circle Patterns</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div class="layout">
+    <div class="canvas-wrapper">
+      <canvas id="fractalCanvas"></canvas>
+      <canvas id="circlesCanvas"></canvas>
+    </div>
+
+    <aside class="sidebar">
+      <header>
+        <div class="header-row">
+          <h1>Circle Patterns</h1>
+          <button class="btn-info" id="infoBtn" title="How it works">?</button>
+        </div>
+        <p class="subtitle">Recursive spirograph generator</p>
+      </header>
+
+      <div class="params">
+        <div class="param">
+          <label for="iterations">Circles</label>
+          <input type="number" id="iterations" value="8" min="1" max="12" step="1" />
+        </div>
+        <div class="param">
+          <label for="multiplier">Multiplier</label>
+          <input type="number" id="multiplier" value="-5" min="-10" max="10" step="1" />
+        </div>
+        <div class="param">
+          <label for="divisor">Divisor</label>
+          <input type="number" id="divisor" value="2" min="-10" max="10" step="1" />
+        </div>
+        <div class="param">
+          <label for="resolution">Resolution</label>
+          <input type="number" id="resolution" value="20" min="1" max="20" step="1" />
+        </div>
+      </div>
+
+      <div class="options">
+        <div class="option">
+          <label>Auto</label>
+          <button class="btn-pill" id="autoBtn">Off</button>
+        </div>
+        <div class="option">
+          <label>Guides</label>
+          <button class="btn-pill" id="guidesBtn">Off</button>
+        </div>
+        <div class="option">
+          <label>Instant</label>
+          <button class="btn-pill" id="instantBtn">Off</button>
+        </div>
+      </div>
+
+      <div class="presets-section">
+        <span class="section-label">Presets</span>
+        <div class="preset-buttons">
+          <button class="btn-preset" data-n="8" data-mult="-5" data-div="2" data-res="20">Jon's profile pic</button>
+          <button class="btn-preset" data-n="6" data-mult="-4" data-div="3" data-res="5">Star</button>
+          <button class="btn-preset" data-n="4" data-mult="7"  data-div="3" data-res="5">Cloud</button>
+          <button class="btn-preset" id="randomBtn">Random</button>
+        </div>
+      </div>
+
+      <div class="actions">
+        <div class="action-row">
+          <button class="btn-primary" id="goBtn">Draw</button>
+        </div>
+        <div class="action-row">
+          <button class="btn-secondary" id="stopBtn" disabled>Stop</button>
+          <button class="btn-secondary" id="resetBtn">Reset</button>
+        </div>
+        <div class="action-row">
+          <button class="btn-secondary" id="saveBtn">Save PNG</button>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="math-overlay" id="mathOverlay">
+    <div class="math-card" id="mathContent">
+      <button class="math-close" id="mathClose">&#215;</button>
+      <h2>How it works</h2>
+
+      <h3>Variables</h3>
+      <ul>
+        <li>\(n\) &mdash; number of circles (iterations), \(n \ge 1\)</li>
+        <li>\(d\) &mdash; size divisor, \(d > 1\)</li>
+        <li>\(m\) &mdash; angle multiplier, \(m \ne 0\)</li>
+        <li>\(i\) &mdash; current iteration (0-indexed)</li>
+        <li>\(r\) &mdash; radius of the outermost circle</li>
+        <li>\((x_0,\,y_0)\) &mdash; centre of the outermost circle</li>
+      </ul>
+
+      <h3>Circle chain</h3>
+      <svg viewBox="0 0 390 195" width="100%" style="display:block;margin:0.75rem 0;" xmlns="http://www.w3.org/2000/svg">
+        <line x1="265" y1="95" x2="145" y2="95" stroke="#333" stroke-width="1" stroke-dasharray="5,3"/>
+        <line x1="145" y1="95" x2="145" y2="155" stroke="#333" stroke-width="1" stroke-dasharray="5,3"/>
+        <circle cx="265" cy="95" r="80" stroke="rgba(0,220,80,0.55)" stroke-width="1.5" fill="none"/>
+        <circle cx="145" cy="95" r="40" stroke="rgba(0,220,80,0.55)" stroke-width="1.5" fill="none"/>
+        <circle cx="145" cy="155" r="20" stroke="rgba(0,220,80,0.55)" stroke-width="1.5" fill="none"/>
+        <line x1="265" y1="95" x2="345" y2="95" stroke="#484848" stroke-width="1"/>
+        <line x1="145" y1="95" x2="145" y2="55" stroke="#484848" stroke-width="1"/>
+        <line x1="145" y1="155" x2="165" y2="155" stroke="#484848" stroke-width="1"/>
+        <text x="299" y="89" fill="#666" font-size="11" font-style="italic" font-family="system-ui,sans-serif">r</text>
+        <text x="149" y="71" fill="#666" font-size="11" font-style="italic" font-family="system-ui,sans-serif">r/d</text>
+        <line x1="265" y1="95" x2="265" y2="60" stroke="#484848" stroke-width="1"/>
+        <path d="M 265 67 A 28 28 0 0 0 237 95" fill="none" stroke="#484848" stroke-width="1"/>
+        <text x="236" y="76" fill="#666" font-size="12" font-style="italic" font-family="system-ui,sans-serif">θ</text>
+        <circle cx="265" cy="95" r="3" fill="#5a5a5a"/>
+        <circle cx="145" cy="95" r="3" fill="#5a5a5a"/>
+        <circle cx="145" cy="155" r="5" fill="#e05252"/>
+        <text x="265" y="113" fill="#666" font-size="11" text-anchor="middle" font-family="system-ui,sans-serif">(x₀, y₀)</text>
+        <text x="168" y="152" fill="#666" font-size="11" font-style="italic" font-family="system-ui,sans-serif">r/d²</text>
+        <text x="145" y="182" fill="#e05252" font-size="11" text-anchor="middle" font-family="system-ui,sans-serif">traced path</text>
+      </svg>
+      <p>Each circle&rsquo;s centre sits on the rim of the previous one. As \(\theta\) sweeps \([0,2\pi]\) the innermost centre traces the pattern (red dot above, with n=3, d=2, m=2).</p>
+
+      <h3>Step by step</h3>
+      <p>Centre of circle 2 &nbsp;(\(i=0\)):</p>
+      \[\begin{aligned} x_2 &= x_0 - \!\left(r \pm \frac{r}{d}\right)\!\cos\theta \\ y_2 &= y_0 - \!\left(r \pm \frac{r}{d}\right)\!\sin\theta \end{aligned}\]
+      <p>Centre of circle 3 &nbsp;(\(i=1\)):</p>
+      \[\begin{aligned} x_3 &= x_2 - \!\left(\frac{r}{d} \pm \frac{r}{d^2}\right)\!\cos(m\theta) \\ y_3 &= y_2 - \!\left(\frac{r}{d} \pm \frac{r}{d^2}\right)\!\sin(m\theta) \end{aligned}\]
+      <p>There is a clear pattern above.</p>
+
+      <h3>General form</h3>
+      <p>The path traced by the innermost circle&rsquo;s centre as \(\theta\) sweeps \([0,\,2\pi]\):</p>
+      \[\begin{aligned} x &= x_0 - \sum_{i\,=\,0}^{n-2}\!\left(\frac{r}{d^{\,i}} \pm \frac{r}{d^{\,i+1}}\right)\cos\!\left(m^i\theta\right) \\ y &= y_0 - \sum_{i\,=\,0}^{n-2}\!\left(\frac{r}{d^{\,i}} \pm \frac{r}{d^{\,i+1}}\right)\sin\!\left(m^i\theta\right) \end{aligned}\]
+      <p>
+        where \(0 \le \theta \le 2\pi\), and \(\pm\) depends on whether the circles
+        are placed outside&nbsp;(\(+\)) or nested inside&nbsp;(\(-\)) one another.
+      </p>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
